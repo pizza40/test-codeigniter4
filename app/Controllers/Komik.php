@@ -55,17 +55,36 @@ class Komik extends BaseController
     {
         //validation input
         if (!$this->validate([
+            //rules untuk judul
             'judul' => [
                 'rules' => 'required|is_unique[komik.judul]',
                 'errors' => [
                     'required' => '{field} Komik harus diisi !',
                     'is_unique' => '{field} komik sudah terdaftar'
                 ]
+                ],
+            //rules untuk sampul
+            'sampul' => [
+                'rules' => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image.jpng]',
+                'errors' => [
+                    'uploaded' => 'Pilih gambar sampul dulu',
+                    'max_size' => 'Gambar terlalu besar',
+                    'is_image' => 'Yang anda pilih bukan gambar',
+                    'mime_in' => 'Yang anda pilih bukan gambar'
+                ]
             ]
         ])) {
-            $validation = \Config\Services::validation();
-            return redirect()->to('/komik/create')->withInput()->with('validation', $validation);
-        }
+            // $validation = \Config\Services::validation();
+            // return redirect()->to('/komik/create')->withInput()->with('validation', $validation);
+            return redirect()->to('/komik/create')->withInput();
+         }
+        
+         //ambil gambar
+         $fileSampul = $this->request->getFile('sampul');
+         //pindahkan file ke folder img
+         $fileSampul->move('img');
+         //ambil nama file
+         $namaSampul = $fileSampul->getName();
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
@@ -73,11 +92,12 @@ class Komik extends BaseController
             'slug' => $slug,
             'penulis' => $this->request->getVar('penulis'),
             'penerbit' => $this->request->getVar('penerbit'),
-            'sampul' => $this->request->getVar('sampul')
+            'sampul' => $namaSampul
         ]);
         session()->setFlashdata('pesan', 'Data berhasil ditambahkan.');
         return redirect()->to('/komik');
     }
+
 
     public function delete($id)
     {
