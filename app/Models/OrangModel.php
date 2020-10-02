@@ -11,4 +11,11 @@ class OrangModel extends Model
     //memberi field yg bisa diisi manual
     protected $allowedFields = ['nama', 'alamat'];
 
+    public function search($keyword){
+        // $builder = $this->table('orang');
+        // $builder->like('nama', $keyword);
+        // return $builder;
+        return $this->table('orang')->like('nama', $keyword)->orLike('alamat', $keyword);
+    }
+
 }

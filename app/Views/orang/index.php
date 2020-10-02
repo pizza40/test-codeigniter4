@@ -5,6 +5,18 @@
     <div class="row">
         <div class="col">
             <h1 class="mt-2">Daftar Orang</h1>
+            <form action="" method="POST">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="masukan Keyword" name="keyword">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit" name="submit">Cari</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
             <table class="table">
                 <thead>
                     <tr>
