@@ -62,12 +62,11 @@ class Komik extends BaseController
                     'required' => '{field} Komik harus diisi !',
                     'is_unique' => '{field} komik sudah terdaftar'
                 ]
-                ],
+            ],
             //rules untuk sampul
             'sampul' => [
-                'rules' => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image.jpng]',
+                'rules' => 'max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image.jpng]',
                 'errors' => [
-                    'uploaded' => 'Pilih gambar sampul dulu',
                     'max_size' => 'Gambar terlalu besar',
                     'is_image' => 'Yang anda pilih bukan gambar',
                     'mime_in' => 'Yang anda pilih bukan gambar'
@@ -77,14 +76,19 @@ class Komik extends BaseController
             // $validation = \Config\Services::validation();
             // return redirect()->to('/komik/create')->withInput()->with('validation', $validation);
             return redirect()->to('/komik/create')->withInput();
-         }
-        
-         //ambil gambar
-         $fileSampul = $this->request->getFile('sampul');
-         //pindahkan file ke folder img
-         $fileSampul->move('img');
-         //ambil nama file
-         $namaSampul = $fileSampul->getName();
+        }
+
+        //ambil gambar
+        $fileSampul = $this->request->getFile('sampul');
+        //apakah tidak ada gambar yang di upload
+        if($fileSampul->getError() == 4){
+            $namaSampul = 'default.jpeg';
+        }else{
+            //generate nama random
+            $namaSampul = $fileSampul->getRandomName();
+            //pindahkan file ke folder img
+            $fileSampul->move('img', $namaSampul);
+        }
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
@@ -124,16 +128,16 @@ class Komik extends BaseController
         //cek judul
         //jika judul tidak di ubah maka 
         $komiklama = $this->komikModel->getKomik($this->request->getVar('slug'));
-        if($komiklama['judul'] == $this->request->getVar('judul')){
+        if ($komiklama['judul'] == $this->request->getVar('judul')) {
             $rule_judul = 'required';
-        }else{
+        } else {
             $rule_judul = 'required|is_unique[komik.judul]';
         }
 
         //validation input
         if (!$this->validate([
             'judul' => [
-                'rules' => $rule_judul,//dari condition di atas
+                'rules' => $rule_judul, //dari condition di atas
                 'errors' => [
                     'required' => '{field} Komik harus diisi !',
                     'is_unique' => '{field} komik sudah terdaftar'
@@ -141,7 +145,7 @@ class Komik extends BaseController
             ]
         ])) {
             $validation = \Config\Services::validation();
-            return redirect()->to('/komik/edit/' .$this->request->getVar('slug'))->withInput()->with('validation', $validation);
+            return redirect()->to('/komik/edit/' . $this->request->getVar('slug'))->withInput()->with('validation', $validation);
         }
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
